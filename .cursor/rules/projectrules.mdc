@@ -1,0 +1,223 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Cursor IDE Rules for Personal Knowledge Graph Server
+
+## Project Overview
+This is an AI-powered Personal Knowledge Graph Server that transforms files and web content into an intelligent, interconnected knowledge network using OpenRouter API and Neo4j. The system automatically processes documents, extracts entities and relationships using AI, and stores them in a graph database for intelligent retrieval.
+
+## Code Style and Standards
+
+### Python Standards
+- Use Python 3.11+ features and type hints
+- Follow PEP 8 style guidelines with line length 88 characters (Black formatter)
+- Use async/await for all I/O operations (file reading, API calls, database operations)
+- Always use context managers (`async with`) for resource management
+- Use dataclasses for structured data (Entity, Relationship, configs)
+- Import order: standard library, third-party, local imports
+
+### Error Handling
+- Use specific exception types, not bare `except:`
+- Log errors with appropriate levels (logger.error, logger.warning)
+- Fail gracefully with meaningful error messages
+- Always close resources in finally blocks or use context managers
+
+### Documentation
+- Use Google-style docstrings for all functions and classes
+- Include type hints for all function parameters and return values
+- Document async functions with "Async" prefix in docstring
+- Add inline comments for complex logic, especially AI prompt engineering
+
+## Architecture Patterns
+
+### Configuration Management
+- All configuration through `src/config.py` with environment variable substitution
+- Use `get_config()` function to access global configuration
+- Validate configuration on startup, fail fast if invalid
+- Support both YAML config files and environment variables
+
+### Async Patterns
+- All database and API operations must be async
+- Use `async with` for Neo4j sessions and HTTP clients
+- Implement proper connection pooling and timeouts
+- Use asyncio.gather() for concurrent operations when possible
+
+### Cost Management
+- Always check budget limits before making API calls
+- Log API usage with model, tokens, and costs
+- Use appropriate model selection based on task complexity:
+  - Simple tasks: Claude Haiku ($0.25/1M tokens)
+  - Complex analysis: Claude Sonnet ($3/1M tokens)
+  - Batch processing: Mixtral ($0.60/1M tokens)
+
+### Privacy and Security
+- Filter sensitive data before sending to cloud APIs
+- Support local processing for sensitive directories
+- Use regex patterns to detect and redact sensitive information
+- Never log sensitive data or API keys
+
+## File Structure Conventions
+
+### Source Code Organization
+```
+src/
+├── config.py              # Configuration management
+├── cloud_nlp.py          # OpenRouter API integration
+├── knowledge_graph.py     # Neo4j operations
+├── file_processor.py      # File monitoring (implement next)
+└── mcp_server.py         # MCP server (future)
+```
+
+### Configuration Files
+```
+config/
+├── config.yaml           # Main configuration
+└── .env                 # Environment variables (not in git)
+```
+
+### Data Directories
+```
+E:\GraphKnowledge\
+├── inbox/               # Files to process
+├── processed/          # Completed files
+├── test/              # Test files
+├── sensitive/         # Local processing only
+└── private/           # Local processing only
+```
+
+## Development Guidelines
+
+### API Integration
+- Always use async HTTP clients (httpx)
+- Implement retry logic for API failures
+- Use proper headers including User-Agent
+- Handle rate limits and API errors gracefully
+- Track usage and costs for all API calls
+
+### Database Operations
+- Use Neo4j async driver with connection pooling
+- Always use parameterized queries to prevent injection
+- Implement proper indexing for performance
+- Use MERGE operations for upserts
+- Include created_at and updated_at timestamps
+
+### Entity and Relationship Processing
+- Extract entities with confidence scores ≥ 0.7
+- Validate extracted entities exist before creating relationships
+- Support entity types: person, organization, concept, technology, project, location, event
+- Store provenance (source file) for all entities and relationships
+
+### File Processing
+- Support file types: .md, .txt, .pdf, .docx, .json
+- Implement file size limits (10MB default)
+- Use appropriate libraries: PyPDF2 for PDFs, python-docx for Word docs
+- Move processed files to avoid reprocessing
+
+## Testing Requirements
+
+### Test Structure
+- Use pytest with pytest-asyncio for async tests
+- Create test files in `tests/` directory
+- Mock external APIs and database connections
+- Test with real sample data in `E:\GraphKnowledge\test\`
+
+### Test Data
+- Create realistic test documents with entities and relationships
+- Include edge cases: empty files, large files, sensitive data
+- Test different file formats and content types
+- Validate entity extraction accuracy and relationship mapping
+
+## Environment Setup
+
+### Required Environment Variables
+```env
+OPENROUTER_API_KEY=your_api_key
+NEO4J_URI=bolt://localhost:7687
+NEO4J_USERNAME=neo4j
+NEO4J_PASSWORD=your_password
+NEO4J_DATABASE=personal-knowledge
+WATCH_DIRECTORY=E:\GraphKnowledge
+PROCESSED_DIRECTORY=E:\GraphKnowledge\processed
+INBOX_DIRECTORY=E:\GraphKnowledge\inbox
+```
+
+### Development Dependencies
+- Core: neo4j, httpx, watchdog, beautifulsoup4, python-dotenv
+- Development: pytest, pytest-asyncio, black, flake8, mypy
+- Optional: spacy, transformers (for advanced NLP)
+
+## Implementation Priorities
+
+### Current Phase: Foundation (Week 1-2)
+1. **NEXT**: Implement file_processor.py with async file monitoring
+2. **Then**: Create MCP server with tools for Claude integration
+3. **Finally**: Add web scraping capabilities
+
+### Key Implementation Notes
+- File monitoring should use watchdog with debouncing (2-second delay)
+- Process files in background task to avoid blocking
+- Implement proper logging for all operations
+- Use existing cloud_nlp and knowledge_graph modules
+- Follow budget limits strictly ($3 daily, $50 monthly)
+
+### MCP Integration (Next Phase)
+- Implement tools: process_file, search_knowledge, get_connections, scrape_url
+- Use mcp library for protocol implementation
+- Support concurrent requests with proper rate limiting
+- Provide detailed error messages for debugging
+
+## Common Patterns
+
+### Async Context Manager Pattern
+```python
+async with OpenRouterProcessor() as processor:
+    entities, relationships = await processor.process_text(content)
+
+async with KnowledgeGraph() as kg:
+    await kg.store_entities(entities)
+```
+
+### Error Handling Pattern
+```python
+try:
+    result = await api_call()
+    logger.info(f"Success: {result}")
+    return result
+except SpecificError as e:
+    logger.error(f"Specific error: {e}")
+    raise
+except Exception as e:
+    logger.error(f"Unexpected error: {e}")
+    return None
+```
+
+### Configuration Access Pattern
+```python
+from src.config import get_config
+
+config = get_config()
+model = config.get_model_for_task("simple")
+is_sensitive = config.is_sensitive_directory(file_path)
+```
+
+## Performance Considerations
+
+- Use connection pooling for Neo4j and HTTP clients
+- Implement caching for frequently accessed entities
+- Batch process multiple files when possible
+- Use appropriate indexes for Neo4j queries
+- Monitor memory usage for large file processing
+- Implement file size limits to prevent resource exhaustion
+
+## Monitoring and Debugging
+
+- Log all major operations with appropriate levels
+- Track API usage and costs in real-time
+- Monitor Neo4j performance and storage usage
+- Implement health checks for external dependencies
+- Use structured logging for easier debugging
+
+
+Always prioritize cost efficiency, privacy protection, and reliable async operations in all implementations.

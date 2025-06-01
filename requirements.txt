@@ -1,0 +1,49 @@
+# Core Dependencies
+asyncio-throttle>=1.0.2
+python-dotenv>=1.0.0
+pyyaml>=6.0
+
+# HTTP Client for OpenRouter API
+httpx>=0.25.0
+
+# File System Monitoring
+watchdog>=3.0.0
+
+# Neo4j Graph Database
+neo4j>=5.0.0
+
+# Web Scraping
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+
+# PDF Processing
+PyPDF2>=3.0.0
+
+# Word Document Processing
+python-docx>=0.8.11
+
+# MCP (Model Context Protocol)
+mcp>=0.3.0
+
+# Data Structures and Utilities
+dataclasses-json==0.6.1
+
+# Logging and Monitoring
+structlog==23.1.0
+
+# Advanced NLP and Embeddings
+sentence-transformers>=2.2.2
+scikit-learn>=1.3.0
+numpy>=1.24.0
+torch>=2.0.0  # Required for sentence-transformers
+
+# Development Dependencies
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.0.0
+
+# Optional: For advanced text processing
+# spacy>=3.6.0
+# transformers>=4.30.0 

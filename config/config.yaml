@@ -1,0 +1,82 @@
+# Personal Knowledge Graph Server Configuration
+
+# OpenRouter API Settings
+openrouter:
+  api_key: "${OPENROUTER_API_KEY}"
+  base_url: "https://openrouter.ai/api/v1"
+  models:
+    simple: "anthropic/claude-3-haiku:beta"  # $0.25/1M tokens
+    complex: "anthropic/claude-3-sonnet:beta"  # $3/1M tokens
+    batch: "mistralai/mixtral-8x7b-instruct"  # $0.60/1M tokens
+  max_tokens: 4096
+  temperature: 0.1
+
+# Neo4j Database Settings
+neo4j:
+  uri: "${NEO4J_URI}"
+  username: "${NEO4J_USERNAME}"
+  password: "${NEO4J_PASSWORD}"
+  database: "${NEO4J_DATABASE}"
+  max_connections: 10
+  timeout: 30
+
+# File Monitoring Settings
+file_monitoring:
+  watch_directory: "${WATCH_DIRECTORY}"
+  processed_directory: "${PROCESSED_DIRECTORY}"
+  inbox_directory: "${INBOX_DIRECTORY}"
+  supported_extensions:
+    - ".md"
+    - ".txt"
+    - ".pdf"
+    - ".docx"
+    - ".json"
+  processing_delay: 2  # seconds
+  max_file_size: 10485760  # 10MB
+
+# Budget and Cost Management
+budget:
+  daily_limit: 3.00
+  weekly_limit: 15.00
+  monthly_limit: 50.00
+  currency: "USD"
+  alert_threshold: 0.8  # Alert at 80% of budget
+
+# MCP Server Settings
+mcp_server:
+  port: 8080
+  host: "localhost"
+  max_concurrent_requests: 10
+  timeout: 300  # 5 minutes
+
+# Entity Extraction Settings
+entity_extraction:
+  confidence_threshold: 0.7
+  max_entities_per_document: 50
+  entity_types:
+    - "person"
+    - "organization"
+    - "concept"
+    - "technology"
+    - "project"
+    - "location"
+    - "event"
+
+# Privacy and Security Settings
+privacy:
+  sensitive_patterns:
+    - "\\b\\d{3}-\\d{2}-\\d{4}\\b"  # SSN
+    - "\\b\\d{4}[\\s-]\\d{4}[\\s-]\\d{4}[\\s-]\\d{4}\\b"  # Credit Card
+    - "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b"  # Email
+  redaction_placeholder: "[REDACTED]"
+  local_processing_directories:
+    - "sensitive"
+    - "private"
+
+# Logging Settings
+logging:
+  level: "INFO"
+  file: "logs/knowledge_graph.log"
+  max_file_size: 10485760  # 10MB
+  backup_count: 5
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s" 
